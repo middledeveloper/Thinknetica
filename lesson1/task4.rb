@@ -1,10 +1,10 @@
-print "Введите коэффециент A: "
+print 'Введите коэффециент A: '
 a = gets.chomp.to_f
 
-print "Введите коэффециент B: "
+print 'Введите коэффециент B: '
 b = gets.chomp.to_f
 
-print "Введите коэффециент C: "
+print 'Введите коэффециент C: '
 c = gets.chomp.to_f
 
 dscr = b**2 - 4 * a * c
