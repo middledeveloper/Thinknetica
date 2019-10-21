@@ -14,7 +14,5 @@ months = {
 }
 
 months.each do |key, value|
-  if(value == 30)
-    puts "#{key.capitalize}: #{value} дней"
-  end
+  puts "#{key.capitalize}: #{value} дней" if value == 30
 end

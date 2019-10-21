@@ -24,12 +24,7 @@ months = {
 }
 
 day_of_year = day
-iterator = 1
-while(iterator < month)
-  day_of_year += months[iterator]
-  iterator += 1
-end
-
+months.each_pair { |month_num, days_count| day_of_year += days_count if month_num < month }
 puts "Указанная дата является #{day_of_year} днем в #{year} году"
 
 =begin

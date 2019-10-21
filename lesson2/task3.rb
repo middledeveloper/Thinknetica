@@ -1,4 +1,4 @@
-fibonacci = Array.new
+fibonacci = []
 num = 0
 
 loop do

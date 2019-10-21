@@ -1,22 +1,17 @@
 
-hash = Hash.new
-active = true
+hash = {}
 
-while(active)
+loop do
   puts 'Введите наименование товара: '
   product_name = gets.chomp
-  active = product_name == 'stop' ? false : true
+  break if product_name == 'stop'
 
-  if(active)
-    puts 'Введите стоимость единицы товара: '
-    product_price = gets.chomp.to_f
-    puts 'Укажите количество единиц товара: '
-    product_count = gets.chomp.to_f
+  puts 'Введите стоимость единицы товара: '
+  product_price = gets.chomp.to_f
+  puts 'Укажите количество единиц товара: '
+  product_count = gets.chomp.to_f
 
-    hash[product_name] = { price: product_price, count: product_count }
-  else
-    puts 'Покупки завершены!'
-  end
+  hash[product_name] = { price: product_price, count: product_count }
 
   total_price = 0
   hash.each do |item, details|
