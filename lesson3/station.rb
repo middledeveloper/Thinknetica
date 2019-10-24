@@ -1,9 +1,10 @@
+# frozen_string_literal: true
+
 require_relative 'train'
 require_relative 'route'
 
 class Station
-  attr_accessor :name
-  attr_accessor :trains
+  attr_reader :name, :trains
 
   def initialize(name)
     @name = name
@@ -11,14 +12,14 @@ class Station
   end
 
   def add_train(train)
-    self.trains.push(train)
+    trains.push(train)
   end
 
   def delete_train(train)
-    self.trains.delete(train)
+    trains.delete(train)
   end
 
-  def train_repo()
-    puts self.trains
+  def train_repo
+    trains
   end
 end

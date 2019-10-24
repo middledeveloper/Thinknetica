@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'route'
 require_relative 'station'
 require_relative 'train'
@@ -12,15 +14,15 @@ route1 = Route.new(station1, station5)
 puts route1.stations.first.name
 puts route1.stations.last.name
 route1.add_station(station4)
-puts route1.stations.count
 
-train = Train.new('0100101', 'пассажирский', 17)
-train.set_route(route1)
+puts route1.station_repo
+puts
 
-#puts train.station.name
-#train.move_station('Вперед')
-#puts train.station.name
+train1 = Train.new('0100101', 'passenger', 17)
+train1.set_route(route1)
 
-train.print_station('предыдущая')
-train.print_station('текущая')
-train.print_station('следующая')
+train1.move_forward
+puts train1.station
+
+train1.move_backward
+puts train1.station
