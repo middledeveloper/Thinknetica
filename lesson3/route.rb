@@ -17,8 +17,4 @@ class Route
     stations.delete(station) if
       station != stations.first && station != stations.last
   end
-
-  def station_repo
-    stations
-  end
 end

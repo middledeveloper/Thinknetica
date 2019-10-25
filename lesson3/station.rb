@@ -18,8 +18,4 @@ class Station
   def delete_train(train)
     trains.delete(train)
   end
-
-  def train_repo
-    trains
-  end
 end

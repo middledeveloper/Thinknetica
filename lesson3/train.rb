@@ -3,11 +3,11 @@
 require_relative 'route'
 require_relative 'station'
 
-$train_type_repo = %w[cargo passenger]
+# $train_type_repo = %w[cargo passenger]
 
 class Train
-  attr_reader :number, :type
-  attr_accessor :wagon_count, :speed, :route, :station
+  attr_reader :number, :type, :wagon_count
+  attr_accessor :speed, :route, :station
 
   def initialize(number, type, wagon_count)
     @number = number
@@ -20,51 +20,39 @@ class Train
     self.speed += speed if speed > 0
   end
 
-  def current_speed
-    speed
-  end
-
   def break
-    speed = 0
-  end
-
-  def current_wagons
-    wagon_count
+    self.speed = 0
   end
 
   def add_wagon
-    wagon_count += 1 if speed == 0
+    self.wagon_count += 1 unless speed.zero?
   end
 
   def remove_wagon
-    wagon_count -= 1 if speed == 0
+    self.wagon_count -= 1 if !speed.zero? && wagon_count > 0
   end
 
   def set_route(route)
-    @route = route
-    @station = route.stations.first
-    station.add_train(self)
+    self.route = route
+    route.stations.first.add_train(self)
+    self.station = route.stations.first
   end
 
   def move_forward
-    unless route.nil?
-      if station != route.stations.last
-        station.delete_train(self)
-        current_station_index = route.stations.index(station)
-        self.station = route.stations[current_station_index += 1]
-        station.add_train(self)
-      end
-    end
+    return if route.nil?
+    return if station != route.stations.last
+
+    station.delete_train(self)
+    self.station = route.stations[route.stations.index(station).to_i + 1]
+    station.add_train(self)
   end
 
   def move_backward
-    current_station_index = route.stations.index(station)
-    unless route.nil?
-      if station != route.stations.first
-        station.delete_train(self)
-        self.station = route.stations[current_station_index -= 1]
-        station.add_train(self)
-      end
-    end
+    return if route.nil?
+    return if station != route.stations.first
+
+    station.delete_train(self)
+    self.station = route.stations[route.stations.index(station).to_i - 1]
+    station.add_train(self)
   end
 end
