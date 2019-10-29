@@ -1,44 +1,74 @@
 # frozen_string_literal: true
 
-require_relative 'route'
-require_relative 'station'
-
-# $train_type_repo = %w[cargo passenger]
-
 class Train
-  attr_reader :number, :type, :wagon_count
-  attr_accessor :speed, :route, :station
+  attr_reader :number, :type, :wagons, :speed, :route, :station
+  ZERO_SPEED = 0
 
-  def initialize(number, type, wagon_count)
+  def initialize(number)
     @number = number
-    @type = type
-    @wagon_count = wagon_count
-    @speed = 0
+    @wagons = []
+    @speed = ZERO_SPEED
   end
 
   def accelerate(speed)
-    self.speed += speed if speed > 0
+    accelerate!(speed)
   end
 
   def break
-    self.speed = 0
+    break!
   end
 
-  def add_wagon
-    self.wagon_count += 1 unless speed.zero?
+  def add_wagon(wagon)
+    add_wagon!(wagon)
   end
 
-  def remove_wagon
-    self.wagon_count -= 1 if !speed.zero? && wagon_count > 0
+  def remove_wagon(wagon)
+    remove_wagon!(wagon)
   end
 
   def set_route(route)
+    set_route!(route)
+  end
+
+  def move_forward
+    move_forward!
+  end
+
+  def move_backward
+    move_backward!
+  end
+
+  private
+
+  # Вынесено в private т.к. методы осуществляют прямое присваивание
+  # значений переменным экземпляра класса. Публичные методы оставляют
+  # возможность переопределения методов при необходимости.
+
+  attr_writer :speed, :route, :station
+
+  def accelerate!(speed)
+    self.speed += speed if speed > ZERO_SPEED
+  end
+
+  def break!
+    self.speed = ZERO_SPEED
+  end
+
+  def add_wagon!(wagon)
+    wagons.push(wagon) if type == wagon.type && speed.zero?
+  end
+
+  def remove_wagon!(wagon)
+    wagons.delete(wagon) if speed.zero? && wagons.count > 0
+  end
+
+  def set_route!(route)
     self.route = route
     route.stations.first.add_train(self)
     self.station = route.stations.first
   end
 
-  def move_forward
+  def move_forward!
     return if route.nil?
     return if station != route.stations.last
 
@@ -47,7 +77,7 @@ class Train
     station.add_train(self)
   end
 
-  def move_backward
+  def move_backward!
     return if route.nil?
     return if station != route.stations.first
 

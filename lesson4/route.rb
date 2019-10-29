@@ -15,6 +15,7 @@ class Route
 
   def delete_station(station)
     stations.delete(station) if
-      station != stations.first && station != stations.last
+      station_instance != stations.first &&
+      station_instance != stations.last
   end
 end
