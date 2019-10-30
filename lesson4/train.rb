@@ -70,7 +70,7 @@ class Train
 
   def move_forward!
     return if route.nil?
-    return if station != route.stations.last
+    return if station == route.stations.last
 
     station.delete_train(self)
     self.station = route.stations[route.stations.index(station).to_i + 1]
@@ -79,7 +79,7 @@ class Train
 
   def move_backward!
     return if route.nil?
-    return if station != route.stations.first
+    return if train.station == train.route.stations.first
 
     station.delete_train(self)
     self.station = route.stations[route.stations.index(station).to_i - 1]

@@ -87,32 +87,33 @@ class UI
           puts train_add_route.inspect
         end
       when 5
-        train_repo.each { |t| puts "#{train_repo.index(t) + 1}. Поезд '#{t.number}', #{t.type}, #{t.wagons.count} вагонов" }
-        print 'Укажите какому поезду следует задать маршрут: '
+        train_repo.each { |t| puts "#{train_repo.index(t) + 1}. Поезд '#{t.number}' (#{t.type}), вагонов: #{t.wagons.count}" }
+        print 'Укажите к какому поезду следует добавить вагон: '
         train_add_wagon = train_repo[get_choice(gets.chomp) - 1]
         wagon_repo.each do |w|
           next unless w.type == train_add_wagon.type
 
-          # Здесь следует добавить проверку на наличие вагона в составе какого-либо из поездов,
-          # но реализовать эту проверку не получается
-          puts "#{wagon_repo.index(w) + 1}. Вагон, тип '#{w.type}'"
+          wagon_used = wagon_used?(w)
+          unless wagon_used
+            puts "#{wagon_repo.index(w) + 1}. Вагон, тип '#{w.type}'"
+          end
         end
         print 'Укажите вагон для добавления к поезду: '
         wagon_to_add = wagon_repo[get_choice(gets.chomp) - 1]
         train_add_wagon.add_wagon(wagon_to_add)
-        puts train_add_wagon.inspect
+        puts "Количество вагонов поезда #{train_add_wagon.number}: #{train_add_wagon.wagons.count}"
+
       when 6
         train_repo.each do |t|
           if t.wagons.count > 0
-            puts "#{train_repo.index(t) + 1}. Поезд '#{t.number}', #{t.type}, вагонов: #{t.wagons.count}"
+            puts "#{train_repo.index(t) + 1}. Поезд '#{t.number}' (#{t.type}), вагонов: #{t.wagons.count}"
           end
         end
         print 'Укажите от какого поезда следует отцепить вагон: '
         train_remove_wagon = train_repo[get_choice(gets.chomp) - 1]
-        train_remove_wagon.wagons.each { |w| puts "#{train_remove_wagon.wagons.index(w) + 1} вагон" }
-        wagon_to_remove = wagon_repo[get_choice(gets.chomp) - 1]
-        train_remove_wagon.remove_wagon(wagon_to_remove)
-        puts train_remove_wagon.inspect
+        puts "Поезд номер #{train_remove_wagon.number} выбран"
+        train_remove_wagon.remove_wagon(train_remove_wagon.wagons.last)
+        puts "Количество вагонов поезда #{train_remove_wagon.number}: #{train_remove_wagon.wagons.count}"
 
       when 7
         train_repo.each do |t|
@@ -129,7 +130,6 @@ class UI
 
         if direction == 1
           if train_to_move.station != train_to_move.route.stations.last
-            # передвижение поезда не фиксируется, не понимаю почему
             train_to_move.move_forward
           else
             puts 'Поезд на конечной станции'
@@ -142,12 +142,11 @@ class UI
           end
         end
 
-        puts 'inspect here:'
-        puts train_to_move.station.inspect
+        puts "Поезд #{train_to_move.number} находится на станции #{train_to_move.station.name}"
 
       when 8
         station_repo.each do |s|
-          puts "Количество поездов на станции: #{s.trains.count}"
+          puts "Количество поездов на станции '#{s.name}': #{s.trains.count}"
           s.trains.each { |t| puts t.number } if s.trains.count > 0
         end
 
@@ -156,6 +155,7 @@ class UI
         choice = get_choice(gets.chomp)
       end
 
+      puts
       show_main_menu
       choice = get_choice(gets.chomp)
     end
@@ -178,6 +178,17 @@ class UI
     choice = value.to_i
     exit if choice == 0
     choice
+  end
+
+  def wagon_used?(wagon)
+    train_repo.each do |train|
+      train.wagons.each do
+        next unless wagon.type == train.type
+        return true if train.wagons.include?(wagon)
+      end
+    end
+
+    false
   end
 
   def seed
