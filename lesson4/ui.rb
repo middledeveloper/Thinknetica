@@ -182,10 +182,8 @@ class UI
 
   def wagon_used?(wagon)
     train_repo.each do |train|
-      train.wagons.each do
-        next unless wagon.type == train.type
-        return true if train.wagons.include?(wagon)
-      end
+      next unless wagon.type == train.type
+      return true if train.wagons.include?(wagon)
     end
 
     false
