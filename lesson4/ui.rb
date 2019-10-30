@@ -16,7 +16,7 @@ class UI
     @train_repo = []
     @wagon_repo = []
 
-    seed
+    # seed
   end
 
   def work
