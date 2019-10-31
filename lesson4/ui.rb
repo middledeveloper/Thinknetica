@@ -2,10 +2,10 @@
 
 require_relative 'route'
 require_relative 'station'
-require_relative 'cargotrain'
-require_relative 'passengertrain'
-require_relative 'cargowagon'
-require_relative 'passengerwagon'
+require_relative 'cargo_train'
+require_relative 'passenger_train'
+require_relative 'cargo_wagon'
+require_relative 'passenger_wagon'
 
 class UI
   attr_reader :station_repo, :route_repo, :train_repo, :wagon_repo
