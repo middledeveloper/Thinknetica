@@ -7,10 +7,10 @@ module InstanceCounter
   end
 
   module ClassMethods
-    attr_reader :instances
+    attr_accessor :instance_count
 
-    def set_instances
-      @instances = @instances.nil? ? 1 : @instances += 1
+    def instances
+      @instance_count ||= 0
     end
   end
 
@@ -18,7 +18,8 @@ module InstanceCounter
     private
 
     def register_instance
-      self.class.set_instances
+      self.class.instance_count ||= 0
+      self.class.instance_count += 1
     end
   end
 end

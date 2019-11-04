@@ -7,14 +7,14 @@ require_relative 'instance_counter'
 class Station
   include InstanceCounter
 
-  @@station_repo = []
+  @@all = []
   attr_reader :name, :trains
 
   def initialize(name)
     @name = name
     @trains = []
 
-    @@station_repo.push(self)
+    @@all.push(self)
     register_instance
   end
 
@@ -27,6 +27,6 @@ class Station
   end
 
   def self.all
-    @@station_repo
+    @@all
   end
 end

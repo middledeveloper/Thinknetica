@@ -203,7 +203,10 @@ class UI
   def station_monitor
     station_repo.each do |s|
       puts "Количество поездов на станции '#{s.name}': #{s.trains.count}"
-      s.trains.each { |t| puts t.number } if s.trains.count > 0
+      if s.trains.count > 0
+        puts 'Поезда на станции:'
+        s.trains.each { |train| puts train.number }
+      end
     end
   end
 
@@ -272,9 +275,9 @@ class UI
     puts
 
     simple_train = Train.new('l077')
-    simple_train.set_manufacturer_name('IBM')
+    simple_train.manufacturer = 'Manufacturer name'
 
-    puts simple_train.get_manufacturer_name
+    puts simple_train.manufacturer
     puts
 
     train_repo[2].set_route(route1)
