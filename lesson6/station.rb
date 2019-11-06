@@ -13,9 +13,7 @@ class Station
   def initialize(name)
     @name = name
     @trains = []
-
     valid?
-
     @@all.push(self)
     register_instance
   end
@@ -40,6 +38,8 @@ class Station
   private
 
   def validate!
-    raise 'Укажите наименование станции!' if name.nil?
+    if name.empty?
+      raise StandardError, 'Наименование станции не может быть пустым!'
+    end
   end
 end

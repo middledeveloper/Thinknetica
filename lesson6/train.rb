@@ -13,23 +13,13 @@ class Train
   ZERO_SPEED = 0
   @@all = {}
 
-  def initialize
-    print 'Укажите номер нового поезда: '
-    number = gets.chomp
-
+  def initialize(number, speed)
     @number = number
-    @wagons = []
-    @speed = ZERO_SPEED
-
+    @speed = speed
     valid?
-
+    @wagons = []
     @@all[number] = self
     register_instance
-
-    puts "Поезд #{@number} (#{@type}) успешно создан!"
-  rescue StandardError => e
-    puts e.message
-    retry
   end
 
   def accelerate(speed)
@@ -41,11 +31,13 @@ class Train
   end
 
   def add_wagon(wagon)
-    wagons.push(wagon) if type == wagon.type && speed.zero?
+    valid_speed?
+    wagons.push(wagon) if type == wagon.type
   end
 
   def remove_wagon(wagon)
-    wagons.delete(wagon) if speed.zero? && wagons.count > 0
+    valid_speed?
+    wagons.delete(wagon) if wagons.count > 0
   end
 
   def set_route(route)
@@ -81,15 +73,25 @@ class Train
     true
   end
 
-  private
+  def valid_speed?
+    validate_speed!
+    true
+  end
 
-  # Вынесено в private т.к. осуществляется прямое присваивание
-  # значений переменным экземпляра класса.
+  private
 
   attr_writer :speed, :route, :station
 
   def validate!
-    raise 'Некорректный формат номера поезда!' if number !~ NUMBER_FORMAT
-    raise 'Не указан тип поезда!' if type.nil?
+    if number !~ NUMBER_FORMAT
+      raise StandardError, 'Некорректный формат номера поезда!'
+    end
+    raise StandardError, 'Скорость задана некорректно!' if speed < 0
+  end
+
+  def validate_speed!
+    if speed > 0
+      raise StandardError, 'Невозможно прицепить и отцепить вагон на скорости!'
+    end
   end
 end

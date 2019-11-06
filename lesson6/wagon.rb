@@ -7,8 +7,9 @@ class Wagon
 
   attr_reader :type
 
-  def initialize(type)
-    @type = type
+  def initialize(manufacturer)
+    @manufacturer = manufacturer
+    valid?
   end
 
   def valid?
@@ -18,5 +19,11 @@ class Wagon
 
   private
 
-  def validate!; end
+  def validate!
+    types = %w[Cargo Passenger]
+    raise StandardError, 'Неизвестный тип вагона!' unless types.include?(type)
+    if manufacturer.empty?
+      raise StandardError, 'Некорректное наименонивание производителя!'
+    end
+  end
 end

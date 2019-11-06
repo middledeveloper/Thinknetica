@@ -18,7 +18,7 @@ class UI
     @train_repo = []
     @wagon_repo = []
 
-    seed
+    # seed
   end
 
   def work
@@ -72,7 +72,7 @@ class UI
     puts '6. Отцепить вагон от поезда'
     puts '7. Перемещение поезда по маршруту'
     puts '8. Просмотр станций и поездов'
-    puts '0. ВЫХОД'
+    puts 'Q => ВЫХОД'
     print 'Введите номер необходимого действия: '
   end
 
@@ -80,21 +80,34 @@ class UI
     print 'Введите наименование станции: '
     station = Station.new(gets.chomp)
     station_repo.push(station)
+  rescue StandardError => e
+    puts e.message
+    puts 'Укажите параметры повторно!'
+    retry
   end
 
   def create_train
     puts '1. Пассажирский'
     puts '2. Грузовой'
     print 'Укажите тип поезда: '
-    type_value = get_choice(gets.chomp)
+    type = get_choice(gets.chomp)
+    print 'Укажите номер поезда: '
+    number = gets.chomp
+    print 'Укажите скорость поезда: '
+    speed = get_choice(gets.chomp)
 
-    if type_value == 1
-      train = PassengerTrain.new
-    elsif type_value == 2
-      train = CargoTrain.new
+    if type == 1
+      train = PassengerTrain.new(number, speed)
+    elsif type == 2
+      train = CargoTrain.new(number, speed)
     end
 
     train_repo.push(train)
+    puts "Поезд #{train.number} (#{train.type}) успешно создан, скорость #{train.speed}!"
+  rescue StandardError => e
+    puts e.message
+    puts 'Укажите параметры повторно!'
+    retry
   end
 
   def create_route
@@ -112,6 +125,10 @@ class UI
       route_repo.push(route)
       puts route_repo
     end
+  rescue StandardError => e
+    puts e.message
+    puts 'Укажите параметры повторно!'
+    retry
   end
 
   def set_route
@@ -127,6 +144,7 @@ class UI
         puts "Маршрут #{route_repo.index(r) + 1}."
         puts r.stations
       end
+
       print 'Укажите маршрут для добавления: '
       train_add_route.set_route(route_repo[get_choice(gets.chomp) - 1])
       puts train_add_route.inspect
@@ -134,20 +152,48 @@ class UI
   end
 
   def add_wagon
-    train_repo.each { |t| puts "#{train_repo.index(t) + 1}. Поезд '#{t.number}' (#{t.type}), вагонов: #{t.wagons.count}" }
+    train_repo.each { |t| puts "#{train_repo.index(t) + 1}. Поезд '#{t.number}' (#{t.type}), вагонов: #{t.wagons.count}, скорость: #{t.speed}" }
     print 'Укажите к какому поезду следует добавить вагон: '
-    train_add_wagon = train_repo[get_choice(gets.chomp) - 1]
-    wagon_repo.each do |w|
-      next unless w.type == train_add_wagon.type
+    train = train_repo[get_choice(gets.chomp) - 1]
+    puts
+    puts '1. Создать вагон'
+    puts '2. Использовать существующий вагон'
+    print 'Укажите действие: '
+    choice = get_choice(gets.chomp)
+    puts
 
-      wagon_used = wagon_used?(w)
-      unless wagon_used
-        puts "#{wagon_repo.index(w) + 1}. Вагон, тип '#{w.type}'"
+    if choice == 1
+      print 'Укажите производителя: '
+      manufacturer = gets.chomp
+      puts
+
+      if train.type == 'Passenger'
+        wagon = PassengerWagon.new(manufacturer)
+      elsif train.type == 'Cargo'
+        wagon = CargoWagon.new(manufacturer)
       end
+
+      wagon_repo.push(wagon)
+    elsif choice == 2
+      wagon_repo.each do |w|
+        next unless w.type == train.type
+
+        wagon_used = wagon_used?(w)
+        unless wagon_used
+          puts "#{wagon_repo.index(w) + 1}. Вагон, тип '#{w.type}' (#{w.manufacturer})"
+        end
+      end
+      print 'Укажите вагон для добавления к поезду: '
+      wagon = wagon_repo[get_choice(gets.chomp) - 1]
     end
-    print 'Укажите вагон для добавления к поезду: '
-    wagon_to_add = wagon_repo[get_choice(gets.chomp) - 1]
-    train_add_wagon.add_wagon(wagon_to_add)
+
+    train.add_wagon(wagon)
+    puts "Вагон #{wagon.type}, произведенный #{wagon.manufacturer}, добавлен к поезду #{train.number}!"
+    puts "Теперь количество вагонов в составе: #{train.wagons.count} шт.)"
+  rescue StandardError => e
+    puts e.message
+    puts 'Укажите параметры повторно!'
+    retry
   end
 
   def remove_wagon
@@ -157,9 +203,13 @@ class UI
       end
     end
     print 'Укажите от какого поезда следует отцепить вагон: '
-    train_remove_wagon = train_repo[get_choice(gets.chomp) - 1]
-    puts "Поезд номер #{train_remove_wagon.number} выбран"
-    train_remove_wagon.remove_wagon(train_remove_wagon.wagons.last)
+    train = train_repo[get_choice(gets.chomp) - 1]
+    puts "Поезд номер #{train.number} выбран"
+    train.remove_wagon(train.wagons.last)
+  rescue StandardError => e
+    puts e.message
+    puts 'Укажите параметры повторно!'
+    retry
   end
 
   def move_train
@@ -201,9 +251,8 @@ class UI
   end
 
   def get_choice(value)
-    choice = value.to_i
-    exit if choice == 0
-    choice
+    exit if value.downcase == 'q'
+    value.to_i
   end
 
   def wagon_used?(wagon)
@@ -216,13 +265,12 @@ class UI
   end
 
   def seed
-    station_repo.push(Station.new('Station1'))
-    station_repo.push(Station.new('Station2'))
-    puts Station.all
-    station_repo.push(Station.new('Station3'))
-    station_repo.push(Station.new('Station4'))
-    station_repo.push(Station.new('Station5'))
-    station_repo.push(Station.new('Station6'))
+    station_repo.push(Station.new('Санкт-Петербург'))
+    station_repo.push(Station.new('Тихвин'))
+    station_repo.push(Station.new('Пикалево'))
+    station_repo.push(Station.new('Бокситогорск'))
+    station_repo.push(Station.new('Горка'))
+    station_repo.push(Station.new('Дыми'))
     puts Station.all
 
     route1 = Route.new(station_repo[0], station_repo[1])
@@ -231,10 +279,10 @@ class UI
     route_repo.push(route1)
     route_repo.push(Route.new(station_repo[3], station_repo[5]))
 
-    train_repo.push(CargoTrain.new)
-    train_repo.push(PassengerTrain.new)
-
-    # Train.new('test01')
+    train1 = CargoTrain.new('TNT-00', 0)
+    train2 = PassengerTrain.new('DVI70', 0)
+    train_repo.push(train1)
+    train_repo.push(train2)
 
     puts "Instance counter:
           Train - #{Train.instances};
@@ -243,31 +291,29 @@ class UI
 
     puts 'Train.find testing'
     puts Train.find('NotExists')
-    puts Train.find('CRG-01')
+    puts Train.find('TNT-00')
     puts
 
-    # simple_train = Train.new('l077')
-    # simple_train.manufacturer = 'Manufacturer name'
+    tr = train_repo[0]
+    puts "Train #{tr.number} is valid? : #{tr.valid?}"
+    tr.set_route(route1)
 
-    # puts simple_train.manufacturer
-    # puts
-
-    train_repo[0].set_route(route1)
-
-    wagon_repo.push(CargoWagon.new)
-    wagon_repo.push(CargoWagon.new)
-    wagon_repo.push(CargoWagon.new)
-    wagon_repo.push(CargoWagon.new)
-    wagon_repo.push(CargoWagon.new)
-    wagon_repo.push(CargoWagon.new)
-    wagon_repo.push(PassengerWagon.new)
-    wagon_repo.push(PassengerWagon.new)
-    wagon_repo.push(PassengerWagon.new)
-    wagon_repo.push(PassengerWagon.new)
-    wagon_repo.push(PassengerWagon.new)
-    wagon_repo.push(PassengerWagon.new)
+    wagon_repo.push(CargoWagon.new('Rails Cargo Inc'))
+    wagon_repo.push(CargoWagon.new('Rails Cargo Inc'))
+    wagon_repo.push(CargoWagon.new('Rails Cargo Inc'))
+    wagon_repo.push(CargoWagon.new('Rails Cargo Inc'))
+    wagon_repo.push(CargoWagon.new('Rails Cargo Inc'))
+    wagon_repo.push(CargoWagon.new('Rails Cargo Inc'))
+    wagon_repo.push(PassengerWagon.new('XTR Wagons'))
+    wagon_repo.push(PassengerWagon.new('Civil Wagon Group'))
+    wagon_repo.push(PassengerWagon.new('Loyal Federation'))
+    wagon_repo.push(PassengerWagon.new('Civil Wagon Group'))
+    wagon_repo.push(PassengerWagon.new('Grey Lion Pride'))
+    wagon_repo.push(PassengerWagon.new('Civil Wagon Group'))
 
     train_repo[0].add_wagon(wagon_repo[0])
     train_repo[1].add_wagon(wagon_repo[7])
+
+    train1.accelerate(60)
   end
 end

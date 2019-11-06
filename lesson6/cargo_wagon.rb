@@ -3,7 +3,8 @@
 require_relative 'wagon'
 
 class CargoWagon < Wagon
-  def initialize
-    super('Cargo')
+  def initialize(manufacturer)
+    @type = 'Cargo'
+    super
   end
 end

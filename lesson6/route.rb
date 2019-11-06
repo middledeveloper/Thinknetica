@@ -12,9 +12,6 @@ class Route
     @stations = [first_station, last_station]
     valid?
     register_instance
-  rescue StandardError => e
-    puts e.message
-    retry
   end
 
   def add_station(station)
@@ -35,6 +32,8 @@ class Route
   private
 
   def validate!
-    raise 'Необходимо указать разные станции!' if stations[0] == stations[1]
+    if stations.first == stations.last
+      raise StandardError, 'Необходимо указать разные станции!'
+    end
   end
 end
