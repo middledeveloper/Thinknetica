@@ -16,7 +16,7 @@ class Train
   def initialize(number, speed)
     @number = number
     @speed = speed
-    valid?
+    validate!
     @wagons = []
     @@all[number] = self
     register_instance
@@ -31,12 +31,12 @@ class Train
   end
 
   def add_wagon(wagon)
-    valid_speed?
+    validate_speed!
     wagons.push(wagon) if type == wagon.type
   end
 
   def remove_wagon(wagon)
-    valid_speed?
+    validate_speed!
     wagons.delete(wagon) if wagons.count > 0
   end
 
@@ -71,11 +71,8 @@ class Train
   def valid?
     validate!
     true
-  end
-
-  def valid_speed?
-    validate_speed!
-    true
+  rescue StandardError
+    false
   end
 
   private

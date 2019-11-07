@@ -189,7 +189,7 @@ class UI
 
     train.add_wagon(wagon)
     puts "Вагон #{wagon.type}, произведенный #{wagon.manufacturer}, добавлен к поезду #{train.number}!"
-    puts "Теперь количество вагонов в составе: #{train.wagons.count} шт.)"
+    puts "Теперь количество вагонов в составе: #{train.wagons.count} шт."
   rescue StandardError => e
     puts e.message
     puts 'Укажите параметры повторно!'

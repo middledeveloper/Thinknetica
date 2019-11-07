@@ -9,12 +9,14 @@ class Wagon
 
   def initialize(manufacturer)
     @manufacturer = manufacturer
-    valid?
+    validate!
   end
 
   def valid?
     validate!
     true
+  rescue StandardError
+    false
   end
 
   private

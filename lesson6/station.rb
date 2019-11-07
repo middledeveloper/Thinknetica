@@ -13,7 +13,7 @@ class Station
   def initialize(name)
     @name = name
     @trains = []
-    valid?
+    validate!
     @@all.push(self)
     register_instance
   end
@@ -33,6 +33,8 @@ class Station
   def valid?
     validate!
     true
+  rescue StandardError
+    false
   end
 
   private

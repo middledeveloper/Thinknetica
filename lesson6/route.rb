@@ -10,7 +10,7 @@ class Route
 
   def initialize(first_station, last_station)
     @stations = [first_station, last_station]
-    valid?
+    validate!
     register_instance
   end
 
@@ -27,6 +27,8 @@ class Route
   def valid?
     validate!
     true
+  rescue StandardError
+    false
   end
 
   private
