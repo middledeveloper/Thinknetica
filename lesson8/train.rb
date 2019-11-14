@@ -40,7 +40,7 @@ class Train
     wagons.delete(wagon) if wagons.count.positive?
   end
 
-  def set_route(route)
+  def bind_route(route)
     self.route = route
     route.stations.first.add_train(self)
     self.station = route.stations.first
