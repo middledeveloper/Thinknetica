@@ -3,3 +3,16 @@ Style/Documentation:
 
 Style/GuardClause:
   Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: true
+  Exclude:
+    - ./ui.rb
+
+Metrics/MethodLength:
+  Enabled: true
+  Exclude:
+    - ./ui.rb

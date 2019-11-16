@@ -11,15 +11,20 @@ class Train
 
   attr_reader :number, :type, :wagons, :speed, :route, :station
   ZERO_SPEED = 0
-  @@all = {}
+  @all = {}
 
   def initialize(number, speed)
     @number = number
     @speed = speed
     validate!
     @wagons = []
-    @@all[number] = self
+    self.class.all[number] = self
+    puts "self.class.all: #{self.class.all}"
     register_instance
+  end
+
+  class << self
+    attr_accessor :all
   end
 
   def accelerate(speed)
@@ -47,23 +52,21 @@ class Train
   end
 
   def move_forward
-    return if route.nil? || station == route.stations.last
+    return if route.nil?
+    return if station == route.stations.last
 
-    station.delete_train(self)
-    self.station = route.stations[route.stations.index(station).to_i + 1]
-    station.add_train(self)
+    move_train_forward(self)
   end
 
   def move_backward
-    return if route.nil? || train.station == train.route.stations.first
+    return if route.nil?
+    return if station == route.stations.first
 
-    station.delete_train(self)
-    self.station = route.stations[route.stations.index(station).to_i - 1]
-    station.add_train(self)
+    move_train_backward(self)
   end
 
   def self.find(train_num)
-    @@all[train_num]
+    @all[train_num]
   end
 
   def wagons_in_train
@@ -80,6 +83,20 @@ class Train
   private
 
   attr_writer :speed, :route, :station
+
+  def move_train_forward(train)
+    station.delete_train(train)
+    next_station_index = route.stations.index(station) + 1
+    train.station = route.stations[next_station_index]
+    station.add_train(train)
+  end
+
+  def move_train_backward(train)
+    station.delete_train(train)
+    prev_station_index = route.stations.index(station) - 1
+    train.station = route.stations[prev_station_index]
+    station.add_train(train)
+  end
 
   def validate!
     if number !~ NUMBER_FORMAT

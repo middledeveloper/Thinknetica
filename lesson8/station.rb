@@ -7,15 +7,19 @@ require_relative 'instance_counter'
 class Station
   include InstanceCounter
 
-  @@all = []
   attr_reader :name, :trains
+  @all = []
 
   def initialize(name)
     @name = name
     @trains = []
     validate!
-    @@all.push(self)
+    self.class.all.push(self)
     register_instance
+  end
+
+  class << self
+    attr_accessor :all
   end
 
   def add_train(train)
@@ -27,11 +31,7 @@ class Station
   end
 
   def trains_on_station
-    trains.each { |train| yield(train) } if block_given?
-  end
-
-  def self.all
-    @@all
+    trains.each { |t| yield(t) } if block_given?
   end
 
   def valid?

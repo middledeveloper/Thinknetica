@@ -28,37 +28,43 @@ class UI
   end
 
   def work
+    seed
+
     loop do
-      show_main_menu
+      show_menu
       choice = get_choice(gets.chomp)
-      case choice
-      when 1
-        create_station
-      when 2
-        create_train
-      when 3
-        create_route
-      when 4
-        set_route
-      when 5
-        add_wagon
-      when 6
-        remove_wagon
-      when 7
-        move_train
-      when 8
-        station_monitor
-      when 9
-        proc_monitor
-      when 10
-        take_capacity
-      end
+      menu_cases(choice)
+    end
+  end
+
+  def menu_cases(choice)
+    case choice
+    when 1
+      create_station
+    when 2
+      create_train
+    when 3
+      create_route
+    when 4
+      set_route
+    when 5
+      add_wagon
+    when 6
+      remove_wagon
+    when 7
+      move_train
+    when 8
+      station_monitor
+    when 9
+      proc_monitor
+    when 10
+      take_capacity
     end
   end
 
   private
 
-  def show_main_menu
+  def show_menu
     puts '1. Создать станцию'
     puts '2. Создать поезд'
     puts '3. Создать маршрут'
@@ -89,6 +95,13 @@ class UI
     number = gets.chomp
     print 'Укажите скорость поезда: '
     speed = get_choice(gets.chomp)
+    prepare_train_and_add_to_repo(type, number, speed)
+  rescue StandardError => e
+    print_error(e)
+    retry
+  end
+
+  def prepare_train_and_add_to_repo(type, number, speed)
     train = if type == 2
               CargoTrain.new(number, speed)
             else
@@ -96,27 +109,33 @@ class UI
             end
     train_repo.push(train)
     puts "Поезд #{train.number} #{train.type} создан, скорость #{train.speed}!"
-  rescue StandardError => e
-    print_error(e)
-    retry
   end
 
   def create_route
     if station_repo.count < 2
       puts 'Недостаточно станций для создания маршрута'
     else
-      print_station_list
-      print 'Необходимо указать начальную станцию: '
-      first_station = station_repo[get_choice(gets.chomp) - 1]
-      print 'Необходимо указать конечную станцию: '
-      last_station = station_repo[get_choice(gets.chomp) - 1]
-
-      route = Route.new(first_station, last_station)
-      route_repo.push(route)
+      prepare_route_stations
     end
   rescue StandardError => e
     print_error(e)
     retry
+  end
+
+  def prepare_route_stations
+    print_station_list
+    print 'Укажите сначала начальную, а затем конечную станции: '
+    first_station = choose_station_by_index(get_choice(gets.chomp) - 1)
+    last_station = choose_station_by_index(get_choice(gets.chomp) - 1)
+    add_route_to_repo(first_station, last_station)
+  end
+
+  def choose_station_by_index(index)
+    station_repo[index]
+  end
+
+  def add_route_to_repo(first_station, last_station)
+    route_repo.push(Route.new(first_station, last_station))
   end
 
   def set_route
@@ -125,49 +144,69 @@ class UI
     elsif route_repo.count.zero?
       puts 'Не создано ни одного маршрута'
     else
-      print_train_list
-      train_add_route = train_repo[get_choice(gets.chomp) - 1]
-      route_repo.each do |route|
-        puts "Маршрут #{route_repo.index(route) + 1}."
-      end
-
-      print 'Укажите маршрут для добавления: '
-      train_add_route.bind_route(route_repo[get_choice(gets.chomp) - 1])
+      train = define_train_for_route
+      route = define_route_to_add
+      train.bind_route(route)
     end
+  end
+
+  def define_train_for_route
+    print_train_list
+    train_repo[get_choice(gets.chomp) - 1]
+  end
+
+  def print_route_list
+    route_repo.each do |route|
+      puts "Маршрут #{route_repo.index(route) + 1}"
+    end
+
+    print 'Укажите маршрут для добавления: '
+  end
+
+  def define_route_to_add
+    print_route_list
+    route_repo[get_choice(gets.chomp) - 1]
   end
 
   def add_wagon
     print_train_list
     train = train_repo[get_choice(gets.chomp) - 1]
+    wagon = prepate_wagon_to_add(train)
+    train.add_wagon(wagon)
+    puts "Вагон #{wagon.type} добавлен к поезду #{train.number}!"
+  rescue StandardError => e
+    print_error(e)
+    retry
+  end
+
+  def prepate_wagon_to_add(train)
     print "Укажите 1 'Создать вагон', или 2 'Использовать существующий': "
     choice = get_choice(gets.chomp)
 
     if choice == 1
-      wagon = make_new_wagon(train.type)
+      make_new_wagon(train.type)
     elsif choice == 2
       print_unused_wagon_list
-      wagon = wagon_repo[get_choice(gets.chomp) - 1]
+      wagon_repo[get_choice(gets.chomp) - 1]
     end
-
-    train.add_wagon(wagon)
-    puts "Вагон #{wagon.type} (#{wagon.manufacturer}) добавлен к поезду " \
-         "#{train.number} (вагонов в составе: #{train.wagons.count})!"
-  rescue StandardError => e
-    print_error(e)
-    retry
   end
 
   def remove_wagon
     train_repo.each do |train|
       print_train_info(train) if train.wagons.count.positive?
     end
+
     print 'Укажите от какого поезда следует отцепить вагон: '
-    train = train_repo[get_choice(gets.chomp) - 1]
-    train.remove_wagon(train.wagons.last)
-    puts "Вагон поезда #{train.number} отцеплен"
+    remove_wagon_by_train_index(get_choice(gets.chomp) - 1)
   rescue StandardError => e
     print_error(e)
     retry
+  end
+
+  def remove_wagon_by_train_index(index)
+    train = train_repo[index]
+    train.remove_wagon(train.wagons.last)
+    puts "Вагон поезда #{train.number} отцеплен"
   end
 
   def move_train
@@ -204,35 +243,47 @@ class UI
       puts "Количество поездов на станции '#{station.name}':  " \
            "#{station.trains.count}"
 
-      unless station.trains.empty?
-        station.trains.each { |train| print_train_info(train) }
-      end
+      show_station_details(station)
+    end
+  end
+
+  def show_station_details(station)
+    unless station.trains.empty?
+      station.trains.each { |train| print_train_info(train) }
     end
   end
 
   def proc_monitor
     station_repo.each do |station|
       if !station.trains.empty?
-        puts "На станции #{station.name} поездов: #{station.trains.count}"
-        station.trains_on_station(&procs[:station])
-        station.trains.each { |train| train.wagons_in_train(&procs[:train]) }
+        show_proc_monitor_details(station)
       else
         puts "На станции #{station.name} поездов нет"
       end
     end
   end
 
+  def show_proc_monitor_details(station)
+    puts "На станции #{station.name} поездов: #{station.trains.count}"
+    station.trains_on_station(&procs[:station])
+    station.trains.each { |train| train.wagons_in_train(&procs[:train]) }
+  end
+
   def take_capacity
     print_wagon_list
     wagon = wagon_repo[get_choice(gets.chomp) - 1]
+    take_capacity_by_type(wagon)
+
+    puts "Место в вагоне #{wagon.number} забронировано."
+  end
+
+  def take_capacity_by_type(wagon)
     if wagon.type == 'Passenger'
       wagon.take_capacity
-    elsif wagon.type == 'Cargo'
+    else
       print 'Укажите какой объем необходимо занять: '
-      capacity_value = get_choice(gets.chomp)
-      wagon.take_capacity(capacity_value)
+      wagon.take_capacity(get_choice(gets.chomp))
     end
-    puts "Место в вагоне #{wagon.number} забронировано."
   end
 
   def get_choice(value)
