@@ -28,6 +28,8 @@ class UI
   end
 
   def work
+    # seed
+
     loop do
       show_menu
       choice = get_choice(gets.chomp)
@@ -361,5 +363,91 @@ class UI
   def print_error(exception)
     puts exception.message
     puts 'Укажите параметры повторно!'
+  end
+
+  def seed
+    station_repo.push(Station.new('Санкт-Петербург'))
+    station_repo.push(Station.new('Тихвин'))
+    station_repo.push(Station.new('Пикалево'))
+    station_repo.push(Station.new('Бокситогорск'))
+    station_repo.push(Station.new('Горка'))
+    station_repo.push(Station.new('Дыми'))
+    puts Station.all
+
+    puts 'route1 creation'
+    route1 = Route.new(station_repo[1], station_repo[0])
+    puts 'route1 add_station'
+    route1.add_station(station_repo[2])
+
+    route1.stations_history
+
+    puts 'route2 creation'
+    route2 = Route.new(station_repo[2], station_repo[1])
+    puts 'route2 stations changing'
+    route2 = Route.new(station_repo[2], station_repo[0])
+    puts 'route2 end'
+
+    route_repo.push(route1, route2)
+
+    train1 = CargoTrain.new('TNT-00', 0)
+    train2 = PassengerTrain.new('DVI70', 0)
+    train_repo.push(train1)
+    train_repo.push(train2)
+
+    puts "Instance counter:
+          Train - #{Train.instances};
+          CargoTrain - #{CargoTrain.instances};
+          PassengerTrain - #{PassengerTrain.instances}"
+
+    puts 'Train.find testing'
+    puts Train.find('NotExists')
+    puts Train.find('TNT-00')
+    puts
+
+    puts "Train #{train1.number} is valid? : #{train1.valid?}"
+
+    train1.set_route(route1)
+    train2.set_route(route2)
+
+    w1 = CargoWagon.new('Rails Cargo Inc', 700)
+    w2 = CargoWagon.new('Rails Cargo Inc', 600)
+    w3 = CargoWagon.new('Rails Cargo Inc', 650)
+    w4 = CargoWagon.new('Rails Cargo Inc', 600)
+    w5 = CargoWagon.new('Rails Cargo Inc', 700)
+    w6 = CargoWagon.new('Rails Cargo Inc', 500)
+    w7 = PassengerWagon.new('XTR Wagons', 80)
+    w8 = PassengerWagon.new('Civil Wagon Group', 90)
+    w9 = PassengerWagon.new('Loyal Federation', 75)
+    w10 = PassengerWagon.new('Civil Wagon Group', 90)
+    w11 = PassengerWagon.new('Grey Lion Pride', 80)
+    w12 = PassengerWagon.new('Civil Wagon Group', 90)
+
+    puts "RANDOM NUMBERS CHECKING: #{w1.number}, #{w2.number}, #{w3.number}, " \
+    "#{w4.number} #{w5.number}"
+
+    wagon_repo.push(w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12)
+    puts "WAGON REPO COUNT: #{wagon_repo.length}"
+
+    train1.add_wagon(w1)
+    train1.add_wagon(w2)
+    train1.add_wagon(w3)
+    train2.add_wagon(w7)
+    train2.add_wagon(w8)
+    train2.add_wagon(w9)
+    train2.add_wagon(w10)
+
+    train1.accelerate(60)
+
+    puts w9.inspect
+    w9.take_capacity
+    puts w9.inspect
+    puts w9.free_capacity
+    puts w9.taken_capacity
+
+    puts w1.inspect
+    w1.take_capacity(270)
+    puts w1.inspect
+    puts w1.free_capacity
+    puts w1.taken_capacity
   end
 end
