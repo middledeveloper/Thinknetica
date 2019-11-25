@@ -5,19 +5,22 @@ require_relative 'validation'
 class ValidationTestClass
   include Validation
 
-  attr_accessor :name, :author
+  attr_accessor :name, :attr_validations
+
+  validate :name, :presence
+  validate :name, :format, /[A-Za-z]{3,15}.[A-Za-z]{3,15}/
+  validate :name, :type, String
+
+  validate :author, :presence
+  validate :author, :format, /[A-Za-z]{3,20}.[A-Za-z]{3,20}/
+  validate :author, :type, String
 
   def initialize(title, author)
-    @title = title
+    @name = title
     @author = author
-    params = { title: title, author: author }
-    params.each do |param|
-      self.class.validate(param, :presence)
-      self.class.validate(param, :format, /A-Z{0,3}/)
-      self.class.validate(param, :type, String)
-    end
+    validate!
   end
 end
 
 ds = ValidationTestClass.new('Death Stranding', 'Hideo Kojima')
-puts ds.inspect
+# puts ds.valid?

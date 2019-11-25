@@ -3,43 +3,23 @@
 module Validation
   def self.included(base)
     base.extend ClassMethods
-    base.send :include, InstanceMethods
+    base.include InstanceMethods
   end
 
   module ClassMethods
-    def validate(_attr_name, validation_type, checker = nil)
-      # получить значение атрибута для дальнейшей валидации
-      _attr_name do |value|
-        presence(value) if validation_type == :presence
-        format(value, checker) if validation_type == :format
-        validate_type(value, checker) if validation_type == :type
+    def validate(attr, method, *validates)
+      define_method("#{attr}_#{method}_validation") do
+        send(method.to_sym, instance_variable_get("@#{attr}"), *validates)
       end
-    end
-
-    private
-
-    def presence(value)
-      return if value.nil? || value.empty?
-
-      raise StandardError, 'Значение не задано!'
-    end
-
-    def format(value, format)
-      return if instance_variable_get(value) !~ format
-
-      raise StandardError, 'Формат параметра некоррекный!'
-    end
-
-    def validate_type(value, value_class)
-      return unless instance_variable_get(value).instance_of? value_class
-
-      raise StandardError, 'Класс значения некорректный!'
     end
   end
 
   module InstanceMethods
     def validate!
-      self.class.validate
+      public_methods.each do |method|
+        send(method) if method =~ /_validation$/
+      end
+      true
     end
 
     def valid?
@@ -47,6 +27,33 @@ module Validation
       true
     rescue StandardError
       false
+    end
+
+    protected
+
+    def presence(value, _validates = nil)
+      raise StandardError, 'Значение не задано!' if value.nil? || value.empty?
+
+      puts "PRESENCE: корректно! (#{value})"
+      true
+    end
+
+    def format(value, regex)
+      if value !~ regex
+        raise StandardError, "Формат параметра некоррекный! (#{value})"
+      end
+
+      puts "FORMAT: корректно! (#{value})"
+      true
+    end
+
+    def type(value, valid_class)
+      unless value.instance_of? valid_class
+        raise StandardError, "Класс значения некорректный! (#{value})"
+      end
+
+      puts "TYPE: корректно! (#{value})"
+      true
     end
   end
 end

@@ -3,15 +3,19 @@
 require_relative 'manufacturer'
 require_relative 'instance_counter'
 require_relative 'accessors'
+require_relative 'validation'
 
 class Train
   include Manufacturer
   include InstanceCounter
   include Accessors
+  include Validation
 
   attr_reader :number, :type, :wagons, :speed, :route, :station
 
-  NUMBER_FORMAT = /(^[a-z0-9]{3}\-?[a-z0-9]{2}$)/i.freeze
+  validate :number, :format, /(^[a-z0-9]{3}\-?[a-z0-9]{2}$)/i
+
+  # NUMBER_FORMAT = /(^[a-z0-9]{3}\-?[a-z0-9]{2}$)/i.freeze
   ZERO_SPEED = 0
 
   @@all = {}
@@ -86,16 +90,16 @@ class Train
 
   attr_writer :speed, :route, :station
 
-  def validate!
-    if number !~ NUMBER_FORMAT
-      raise StandardError, 'Некорректный формат номера поезда!'
-    end
-    raise StandardError, 'Скорость задана некорректно!' if speed < 0
-  end
-
-  def validate_speed!
-    if speed > 0
-      raise StandardError, 'Невозможно прицепить и отцепить вагон на скорости!'
-    end
-  end
+  #  def validate!
+  #    # if number !~ NUMBER_FORMAT
+  #    #  raise StandardError, 'Некорректный формат номера поезда!'
+  #    # end
+  #    raise StandardError, 'Скорость задана некорректно!' if speed < 0
+  #  end
+  #
+  #  def validate_speed!
+  #    if speed > 0
+  #      raise StandardError, 'Невозможно прицепить и отцепить вагон на скорости!'
+  #    end
+  #  end
 end
